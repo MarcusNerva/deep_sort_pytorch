@@ -63,10 +63,10 @@ if __name__ == '__main__':
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         log_path = os.path.join(save_path, 'info.log')
-        obtain_tracks_cmd = obtain_tracks_cmd.format(video_path=video_path, save_path=save_path)
-        obtain_tracks_cmd = obtain_tracks_cmd.split()
+        cmd = obtain_tracks_cmd.format(video_path=video_path, save_path=save_path)
+        cmd = cmd.split()
         with open(log_path, 'w') as log:
-            subprocess.call(obtain_tracks_cmd, stdout=log, stderr=log)
+            subprocess.call(cmd, stdout=log, stderr=log)
 
         get_visual_data(save_dir=save_path, data_dir=data_dir, video_name=video_name)
 
