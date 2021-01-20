@@ -56,16 +56,22 @@ class MyExtractor(object):
         self.net.to(self.device)
         self.trans = trans
 
-    def _preprocess(self, im_crops):
-        im_batch = torch.cat([self.trans(Image.fromarray(im)) for im in im_crops], dim=0).float()
-        return im_batch
+    # def _preprocess(self, im_crops):
+    #     im_batch = torch.cat([self.trans(Image.fromarray(im)) for im in im_crops], dim=0).float()
+    #     return im_batch
 
     def __call__(self, im_crops):
-        im_batch = self._preprocess(im_crops)
+        # im_batch = self._preprocess(im_crops)
+        features = []
         with torch.no_grad():
-            im_batch = im_batch.to(self.device)
-            features = self.net(im_batch)
-        return features.cpu().numpy()
+            for im in im_crops:
+                im = Image.fromarray(im)
+                im = self.trans(im).unsqueeze(0).to(self.device)
+                feat = self.net(im)
+                feat = feat.squeeze().cpu().numpy()
+                features.append(feat)
+            features = np.stack(features, axis=0)
+        return features
 
 if __name__ == '__main__':
     img = cv2.imread("demo.jpg")[:,:,(2,1,0)]
