@@ -80,6 +80,7 @@ class Track:
         self.positions = []
         if feature is not None:
             self.features.append(feature)
+            self.features_store.append(feature)
         if frame_id is not None:
             self.frame_ids.append(frame_id)
         if position is not None:
