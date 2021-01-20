@@ -29,7 +29,7 @@ def get_visual_data(save_dir, data_dir, video_name):
         if siz < interval: continue
 
         temp = []
-        frames, features, positions, class_id = track.frame_ids, track.features, track.positions, track.class_idx
+        frames, features, positions, class_id = track['frame_ids'], track['features'], track['positions'], track['class_id']
         for id in frame_ids:
             if id not in frames:
                 feat = np.ones(dim) * -1.0

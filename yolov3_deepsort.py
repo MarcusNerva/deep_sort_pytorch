@@ -136,12 +136,11 @@ class VideoTracker(object):
             pickle.dump(idx_frame, f)
 
         tracks = self.deepsort.get_tracks()
-        print(type(tracks))
         with open(self.save_tracks_path, 'wb') as f:
             pickle.dump(tracks, f)
 
-        import IPython
-        IPython.embed()
+        # import IPython
+        # IPython.embed()
 
 
 def parse_args():
