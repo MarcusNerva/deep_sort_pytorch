@@ -56,7 +56,7 @@ class MyExtractor(object):
         self.trans = trans
 
     def _preprocess(self, im_crops):
-        im_batch = self.trans(im_crops)
+        im_batch = torch.cat([self.trans(im) for im in im_crops], dim=0).float()
         return im_batch
 
     def __call__(self, im_crops):
