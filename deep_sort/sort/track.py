@@ -185,6 +185,6 @@ class Track:
         track_dict['class_id'] = self.class_idx
         track_dict['frame_ids'] = self.frame_ids
         track_dict['features'] = self.features
-        print('##############total features len is {length}################'.format(len(self.features)))
+        print('##############total features len is {length}################'.format(length=len(self.features)))
         track_dict['positions'] = self.positions
         return track_dict
