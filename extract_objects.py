@@ -20,7 +20,7 @@ def get_visual_data(save_dir, data_dir, video_name):
     with open(length_path, 'rb') as f:
         frames_numb = pickle.load(f)
 
-    frame_ids = np.linspace(start=2, stop=frames_numb, num=30, dtype=int)
+    frame_ids = np.linspace(start=2, stop=frames_numb - 1, num=30, dtype=int)
     interval = frames_numb // 30
 
     visual_features = []
@@ -60,6 +60,8 @@ if __name__ == '__main__':
         video_name = video_list.split('/')[-1]
         video_name = video_name.split('.')[0]
         save_path = os.path.join(save_dir, video_name)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
         log_path = os.path.join(save_path, 'info.log')
         obtain_tracks_cmd = obtain_tracks_cmd.format(video_path=video_path, save_path=save_path)
         obtain_tracks_cmd = obtain_tracks_cmd.split()
@@ -67,3 +69,6 @@ if __name__ == '__main__':
             subprocess.call(obtain_tracks_cmd, stdout=log, stderr=log)
 
         get_visual_data(save_dir=save_path, data_dir=data_dir, video_name=video_name)
+
+        import IPython
+        IPython.embed()

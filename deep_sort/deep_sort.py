@@ -32,14 +32,6 @@ class DeepSort(object):
         bbox_tlwh = self._xywh_to_tlwh(bbox_xywh)
         detections = [Detection(bbox_tlwh[i], conf, cls_ids[i], frame_id, features[i]) for i,conf in enumerate(confidences) if conf>self.min_confidence]
 
-        '''================================================================='''
-        save_dir = '/home/hanhuaye/PythonProject/opensource/deep_sort_pytorch/output'
-        import os, pickle
-        save_path = os.path.join(save_dir, str(frame_id) + '.pkl')
-        with open(save_path, 'wb') as f:
-            pickle.dump(im_crops, f)
-        '''================================================================='''
-
         # run on non-maximum supression
         boxes = np.array([d.tlwh for d in detections])
         scores = np.array([d.confidence for d in detections])
