@@ -115,9 +115,5 @@ class DeepSort(object):
             features = np.array([])
         return features
 
-    def save_tracks(self, save_dir):
-        import os
-        save_path = os.path.join(save_dir, 'tracks.pkl')
-        tracks_store = self.tracker.tracks
-        with open(save_path, 'wb') as f:
-            pickle.dump(tracks_store, f)
+    def get_tracks(self):
+        return self.tracker.tracks

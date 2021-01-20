@@ -60,6 +60,7 @@ class VideoTracker(object):
             self.save_video_path = os.path.join(self.args.save_path, "results.avi")
             self.save_results_path = os.path.join(self.args.save_path, "results.txt")
             self.save_length_path = os.path.join(self.args.save_path, 'length.pkl')
+            self.save_tracks_path = os.path.join(self.args.save_path, 'tracks.pkl')
 
             # create video writer
             fourcc = cv2.VideoWriter_fourcc(*'MJPG')
@@ -134,7 +135,10 @@ class VideoTracker(object):
         with open(self.save_length_path, 'wb') as f:
             pickle.dump(idx_frame, f)
 
-        self.deepsort.save_tracks(self.args.save_path)
+        tracks = self.deepsort.get_tracks()
+        print(type(tracks))
+        with open(self.save_tracks_path, 'wb') as f:
+            pickle.dump(tracks, f)
 
 def parse_args():
     parser = argparse.ArgumentParser()
