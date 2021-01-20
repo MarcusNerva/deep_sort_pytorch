@@ -100,7 +100,7 @@ class VideoTracker(object):
             cls_ids = cls_ids[mask]
 
             # do tracking
-            outputs = self.deepsort.update(bbox_xywh, cls_conf, cls_ids, im)
+            outputs = self.deepsort.update(bbox_xywh, cls_conf, cls_ids, im, idx_frame)
 
             # draw boxes for visualization
             if len(outputs) > 0:
