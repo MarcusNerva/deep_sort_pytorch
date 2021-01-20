@@ -57,7 +57,7 @@ if __name__ == '__main__':
     video_list = glob.glob(os.path.join(videos_dir, '*.mp4'))
 
     for video_path in video_list:
-        video_name = video_list.split('/')[-1]
+        video_name = video_path.split('/')[-1]
         video_name = video_name.split('.')[0]
         save_path = os.path.join(save_dir, video_name)
         if not os.path.exists(save_path):
