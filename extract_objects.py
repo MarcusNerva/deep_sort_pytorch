@@ -40,10 +40,10 @@ def get_visual_data(save_dir, data_dir, video_name):
                 class_vec = np.zeros(80)
                 class_vec[class_id] = 1.0
                 feat = np.concatenate([pos, visual, class_vec], axis=0)
-                assert feat.size[0] == dim
+                assert feat.shape[0] == dim
             temp.append(feat)
         temp = np.stack(temp, axis=0)
-        assert temp.size[0] == 30
+        assert temp.shape[0] == 30
         visual_features.append(temp)
     visual_features = np.stack(visual_features, axis=0)
     np.save(visual_feature_path, visual_features)
