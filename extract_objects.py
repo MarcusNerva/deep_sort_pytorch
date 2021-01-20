@@ -25,7 +25,7 @@ def get_visual_data(save_dir, data_dir, video_name):
 
     visual_features = []
     for track in tracks:
-        siz = track.get_length()
+        siz = len(track['frame_ids'])
         if siz < interval: continue
 
         temp = []
