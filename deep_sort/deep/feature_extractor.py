@@ -3,6 +3,7 @@ import torchvision.transforms as transforms
 import numpy as np
 import cv2
 import logging
+from PIL import Image
 
 from .model import Net
 from .pytorch_model import trans, get_resnext101_32x8d
@@ -56,7 +57,7 @@ class MyExtractor(object):
         self.trans = trans
 
     def _preprocess(self, im_crops):
-        im_batch = torch.cat([self.trans(im) for im in im_crops], dim=0).float()
+        im_batch = torch.cat([self.trans(Image.fromarray(im)) for im in im_crops], dim=0).float()
         return im_batch
 
     def __call__(self, im_crops):
