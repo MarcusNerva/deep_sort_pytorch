@@ -145,6 +145,7 @@ class Track:
         self.mean, self.covariance = kf.update(
             self.mean, self.covariance, detection.to_xyah())
         self.features.append(detection.feature)
+        print('==============length of self.features is {length}+++++++++++++++'.format(length=len(self.features)))
         self.frame_ids.append(detection.frame_id)
         self.positions.append(detection.tlwh)
 
@@ -184,5 +185,6 @@ class Track:
         track_dict['class_id'] = self.class_idx
         track_dict['frame_ids'] = self.frame_ids
         track_dict['features'] = self.features
+        print('##############total features len is {length}################'.format(len(self.features)))
         track_dict['positions'] = self.positions
         return track_dict
