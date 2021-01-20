@@ -5,6 +5,7 @@ import cv2
 import logging
 
 from .model import Net
+from .pytorch_model import trans, get_resnext101_32x8d
 
 class Extractor(object):
     def __init__(self, model_path, use_cuda=True):
@@ -46,6 +47,24 @@ class Extractor(object):
             features = self.net(im_batch)
         return features.cpu().numpy()
 
+class MyExtractor(object):
+    def __init__(self):
+        super(MyExtractor, self).__init__()
+        self.net = get_resnext101_32x8d(pretrained=True)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.net.to(self.device)
+        self.trans = trans
+
+    def _preprocess(self, im_crops):
+        im_batch = self.trans(im_crops)
+        return im_batch
+
+    def __call__(self, im_crops):
+        im_batch = self._preprocess(im_crops)
+        with torch.no_grad():
+            im_batch = im_batch.to(self.device)
+            features = self.net(im_batch)
+        return features.cpu().numpy()
 
 if __name__ == '__main__':
     img = cv2.imread("demo.jpg")[:,:,(2,1,0)]

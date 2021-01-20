@@ -1,7 +1,8 @@
 import numpy as np
 import torch
+import pickle
 
-from .deep.feature_extractor import Extractor
+from .deep.feature_extractor import Extractor, MyExtractor
 from .sort.nn_matching import NearestNeighborDistanceMetric
 from .sort.preprocessing import non_max_suppression
 from .sort.detection import Detection
@@ -16,19 +17,20 @@ class DeepSort(object):
         self.min_confidence = min_confidence
         self.nms_max_overlap = nms_max_overlap
 
-        self.extractor = Extractor(model_path, use_cuda=use_cuda)
+        # self.extractor = Extractor(model_path, use_cuda=use_cuda)
+        self.extractor = MyExtractor()
 
         max_cosine_distance = max_dist
         nn_budget = 100
         metric = NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
         self.tracker = Tracker(metric, max_iou_distance=max_iou_distance, max_age=max_age, n_init=n_init)
 
-    def update(self, bbox_xywh, confidences, ori_img):
+    def update(self, bbox_xywh, confidences, cls_ids, ori_img, frame_id):
         self.height, self.width = ori_img.shape[:2]
         # generate detections
         features = self._get_features(bbox_xywh, ori_img)
         bbox_tlwh = self._xywh_to_tlwh(bbox_xywh)
-        detections = [Detection(bbox_tlwh[i], conf, features[i]) for i,conf in enumerate(confidences) if conf>self.min_confidence]
+        detections = [Detection(bbox_tlwh[i], conf, cls_ids[i], frame_id, features[i]) for i,conf in enumerate(confidences) if conf>self.min_confidence]
 
         # run on non-maximum supression
         boxes = np.array([d.tlwh for d in detections])
@@ -46,11 +48,12 @@ class DeepSort(object):
             if not track.is_confirmed() or track.time_since_update > 1:
                 continue
             box = track.to_tlwh()
-            x1,y1,x2,y2 = self._tlwh_to_xyxy(box)
+            x1, y1, x2, y2 = self._tlwh_to_xyxy(box)
             track_id = track.track_id
-            outputs.append(np.array([x1,y1,x2,y2,track_id], dtype=np.int))
+            class_idx = track.class_idx
+            outputs.append(np.array([x1, y1, x2, y2, track_id, class_idx], dtype=np.int))
         if len(outputs) > 0:
-            outputs = np.stack(outputs,axis=0)
+            outputs = np.stack(outputs, axis=0)
         return outputs
 
 
@@ -103,7 +106,7 @@ class DeepSort(object):
     def _get_features(self, bbox_xywh, ori_img):
         im_crops = []
         for box in bbox_xywh:
-            x1,y1,x2,y2 = self._xywh_to_xyxy(box)
+            x1, y1, x2, y2 = self._xywh_to_xyxy(box)
             im = ori_img[y1:y2,x1:x2]
             im_crops.append(im)
         if im_crops:
@@ -112,4 +115,9 @@ class DeepSort(object):
             features = np.array([])
         return features
 
-
+    def save_tracks(self, save_dir):
+        import os
+        save_path = os.path.join(save_dir, 'tracks.pkl')
+        tracks_store = self.tracker.tracks
+        with open(save_path, 'wb') as f:
+            pickle.dump(tracks_store, f)

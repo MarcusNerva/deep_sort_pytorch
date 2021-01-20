@@ -5,6 +5,7 @@ import argparse
 import torch
 import warnings
 import numpy as np
+import pickle
 
 from detector import build_detector
 from deep_sort import build_tracker
@@ -58,6 +59,7 @@ class VideoTracker(object):
             # path of saved video and results
             self.save_video_path = os.path.join(self.args.save_path, "results.avi")
             self.save_results_path = os.path.join(self.args.save_path, "results.txt")
+            self.save_length_path = os.path.join(self.args.save_path, 'length.pkl')
 
             # create video writer
             fourcc = cv2.VideoWriter_fourcc(*'MJPG')
@@ -95,21 +97,23 @@ class VideoTracker(object):
             # bbox dilation just in case bbox too small, delete this line if using a better pedestrian detector
             bbox_xywh[:, 3:] *= 1.2
             cls_conf = cls_conf[mask]
+            cls_ids = cls_ids[mask]
 
             # do tracking
-            outputs = self.deepsort.update(bbox_xywh, cls_conf, im)
+            outputs = self.deepsort.update(bbox_xywh, cls_conf, cls_ids, im)
 
             # draw boxes for visualization
             if len(outputs) > 0:
                 bbox_tlwh = []
                 bbox_xyxy = outputs[:, :4]
-                identities = outputs[:, -1]
+                identities = outputs[:, -2]
+                class_idxs = outputs[:, -1]
                 ori_im = draw_boxes(ori_im, bbox_xyxy, identities)
 
                 for bb_xyxy in bbox_xyxy:
                     bbox_tlwh.append(self.deepsort._xyxy_to_tlwh(bb_xyxy))
 
-                results.append((idx_frame - 1, bbox_tlwh, identities))
+                results.append((idx_frame - 1, bbox_tlwh, class_idxs, identities))
 
             end = time.time()
 
@@ -127,6 +131,10 @@ class VideoTracker(object):
             self.logger.info("time: {:.03f}s, fps: {:.03f}, detection numbers: {}, tracking numbers: {}" \
                              .format(end - start, 1 / (end - start), bbox_xywh.shape[0], len(outputs)))
 
+        with open(self.save_length_path, 'wb') as f:
+            pickle.dump(idx_frame, f)
+
+        self.deepsort.save_tracks(self.args.save_path)
 
 def parse_args():
     parser = argparse.ArgumentParser()

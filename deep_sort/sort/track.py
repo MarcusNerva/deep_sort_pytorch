@@ -63,19 +63,26 @@ class Track:
 
     """
 
-    def __init__(self, mean, covariance, track_id, n_init, max_age,
+    def __init__(self, mean, covariance, track_id, class_idx, frame_id, position, n_init, max_age,
                  feature=None):
         self.mean = mean
         self.covariance = covariance
         self.track_id = track_id
+        self.class_idx = class_idx
         self.hits = 1
         self.age = 1
         self.time_since_update = 0
 
         self.state = TrackState.Tentative
+        self.frame_ids = []
         self.features = []
+        self.positions = []
         if feature is not None:
             self.features.append(feature)
+        if frame_id is not None:
+            self.frame_ids.append(frame_id)
+        if position is not None:
+            self.positions.append(position)
 
         self._n_init = n_init
         self._max_age = max_age
@@ -138,6 +145,8 @@ class Track:
         self.mean, self.covariance = kf.update(
             self.mean, self.covariance, detection.to_xyah())
         self.features.append(detection.feature)
+        self.frame_ids.append(detection.frame_id)
+        self.positions.append(detection.tlwh)
 
         self.hits += 1
         self.time_since_update = 0
@@ -164,3 +173,7 @@ class Track:
     def is_deleted(self):
         """Returns True if this track is dead and should be deleted."""
         return self.state == TrackState.Deleted
+
+    def get_length(self):
+        """Return track length"""
+        return len(self.frame_ids)
