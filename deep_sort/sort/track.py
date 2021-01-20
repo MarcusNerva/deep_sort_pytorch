@@ -76,6 +76,7 @@ class Track:
         self.state = TrackState.Tentative
         self.frame_ids = []
         self.features = []
+        self.features_store = []
         self.positions = []
         if feature is not None:
             self.features.append(feature)
@@ -145,9 +146,9 @@ class Track:
         self.mean, self.covariance = kf.update(
             self.mean, self.covariance, detection.to_xyah())
         self.features.append(detection.feature)
-        print('==============length of self.features is {length}+++++++++++++++'.format(length=len(self.features)))
         self.frame_ids.append(detection.frame_id)
         self.positions.append(detection.tlwh)
+        self.features_store.append(detection.feature)
 
         self.hits += 1
         self.time_since_update = 0
@@ -184,7 +185,6 @@ class Track:
         track_dict['track_id'] = self.track_id
         track_dict['class_id'] = self.class_idx
         track_dict['frame_ids'] = self.frame_ids
-        track_dict['features'] = self.features
-        print('##############total features len is {length}################'.format(length=len(self.features)))
+        track_dict['features'] = self.features_store
         track_dict['positions'] = self.positions
         return track_dict
