@@ -177,3 +177,12 @@ class Track:
     def get_length(self):
         """Return track length"""
         return len(self.frame_ids)
+
+    def get_track(self):
+        track_dict = {}
+        track_dict['track_id'] = self.track_id
+        track_dict['class_id'] = self.class_idx
+        track_dict['frame_ids'] = self.frame_ids
+        track_dict['features'] = self.features
+        track_dict['positions'] = self.positions
+        return track_dict

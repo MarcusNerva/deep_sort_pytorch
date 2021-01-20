@@ -116,4 +116,4 @@ class DeepSort(object):
         return features
 
     def get_tracks(self):
-        return self.tracker.tracks
+        return self.tracker.get_tracks()

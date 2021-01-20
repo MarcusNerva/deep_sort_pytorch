@@ -140,6 +140,10 @@ class VideoTracker(object):
         with open(self.save_tracks_path, 'wb') as f:
             pickle.dump(tracks, f)
 
+        import IPython
+        IPython.embed()
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("VIDEO_PATH", type=str)

@@ -136,3 +136,10 @@ class Tracker:
             mean, covariance, self._next_id, detection.class_idx, detection.frame_id, detection.tlwh, self.n_init, self.max_age,
             detection.feature))
         self._next_id += 1
+
+    def get_tracks(self):
+        ret = []
+        for tk in self.tracks:
+            tk = tk.get_track()
+            ret.append(tk)
+        return ret
