@@ -14,6 +14,7 @@ def get_visual_data(save_dir, data_dir, video_name):
     length_path = os.path.join(save_dir, 'length.pkl')
     visual_feature_dir = os.path.join(data_dir, 'objects')
     visual_feature_path = os.path.join(visual_feature_dir, video_name + '.npy')
+    hastracks_path = os.path.join(visual_feature_dir, video_name + '_hastracks.pkl')
 
     with open(tracks_path, 'rb') as f:
         tracks = pickle.load(f)
@@ -23,7 +24,9 @@ def get_visual_data(save_dir, data_dir, video_name):
     frame_ids = np.linspace(start=2, stop=frames_numb - 1, num=30, dtype=int)
     interval = frames_numb // 30
 
+    has_tracks = True
     visual_features = []
+    fake_feature = np.concatenate([np.ones([1, 30, dim - 80]) * -1.0, np.zeros([1, 30, 80])], axis=-1)
     for track in tracks:
         siz = len(track['frame_ids'])
         if siz < interval: continue
@@ -42,11 +45,19 @@ def get_visual_data(save_dir, data_dir, video_name):
                 feat = np.concatenate([pos, visual, class_vec], axis=0)
                 assert feat.shape[0] == dim
             temp.append(feat)
-        temp = np.stack(temp, axis=0)
-        assert temp.shape[0] == 30
+        temp = np.concatenate([feat[np.newaxis, ...] for feat in temp], axis=0)
+        assert temp.shape[0] == 30 and temp.shape[1] == dim and len(temp.shape) == 2
         visual_features.append(temp)
-    visual_features = np.stack(visual_features, axis=0)
+    if len(visual_features) > 0:
+        visual_features = np.concatenate([vf[np.newaxis, ...] for vf in visual_features], axis=0)
+    else:
+        has_tracks = False
+        visual_features = fake_feature
+
+    assert len(visual_features.shape) == 3 and visual_features.shape[1] == 30 and visual_features.shape[-1] == dim
     np.save(visual_feature_path, visual_features)
+    with open(hastracks_path, 'wb') as f:
+        pickle.dump(has_tracks, f)
 
 
 
@@ -70,5 +81,5 @@ if __name__ == '__main__':
 
         get_visual_data(save_dir=save_path, data_dir=data_dir, video_name=video_name)
 
-        import IPython
-        IPython.embed()
+        # import IPython
+        # IPython.embed()
