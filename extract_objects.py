@@ -68,6 +68,7 @@ if __name__ == '__main__':
     video_list = glob.glob(os.path.join(videos_dir, '*.mp4'))
     has_process = glob.glob(os.path.join(os.path.join(data_dir, 'objects'), '*.npy'))
     has_process = [item.split('/')[-1].split('.')[0] for item in has_process]
+    print(has_process)
 
     for video_path in video_list:
         video_name = video_path.split('/')[-1]
