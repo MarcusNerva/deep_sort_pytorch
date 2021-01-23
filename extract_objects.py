@@ -64,12 +64,16 @@ def get_visual_data(save_dir, data_dir, video_name):
 if __name__ == '__main__':
     videos_dir = '/home/hanhuaye/PythonProject/train-video'
     save_dir = '/home/hanhuaye/PythonProject/opensource/deep_sort_pytorch/output'
-    data_dir = '/home/hanhuaye/PythonProject/rs_captioning/data'
+    data_dir = '/home/hanhuaye/PythonProject/rs_captioning/data/MSRVTT'
     video_list = glob.glob(os.path.join(videos_dir, '*.mp4'))
+    has_process = glob.glob(os.path.join(os.path.join(data_dir, 'objects'), '*.npy'))
+    has_process = [item.split('/')[-1].split('.')[0] for item in has_process]
 
     for video_path in video_list:
         video_name = video_path.split('/')[-1]
         video_name = video_name.split('.')[0]
+        if video_name in has_process: continue
+
         save_path = os.path.join(save_dir, video_name)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
