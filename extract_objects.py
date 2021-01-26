@@ -62,10 +62,11 @@ def get_visual_data(save_dir, data_dir, video_name):
 
 
 if __name__ == '__main__':
-    videos_dir = '/home/hanhuaye/PythonProject/train-video'
+    videos_dir = '/home/hanhuaye/PythonProject/YouTubeClips'
     save_dir = '/home/hanhuaye/PythonProject/opensource/deep_sort_pytorch/output'
-    data_dir = '/home/hanhuaye/PythonProject/rs_captioning/data/MSRVTT'
-    video_list = glob.glob(os.path.join(videos_dir, '*.mp4'))
+    data_dir = '/home/hanhuaye/PythonProject/rs_captioning/data/MSVD'
+    # video_list = glob.glob(os.path.join(videos_dir, '*.mp4'))
+    video_list = glob.glob(os.path.join(videos_dir, '*.avi'))
     has_process = glob.glob(os.path.join(os.path.join(data_dir, 'objects'), '*.npy'))
     has_process = [item.split('/')[-1].split('.')[0] for item in has_process]
     print(has_process)
@@ -86,5 +87,7 @@ if __name__ == '__main__':
 
         get_visual_data(save_dir=save_path, data_dir=data_dir, video_name=video_name)
 
+
+    print('========================Extraction finished!=============================')
         # import IPython
         # IPython.embed()
