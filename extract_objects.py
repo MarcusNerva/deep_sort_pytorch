@@ -21,7 +21,7 @@ def get_visual_data(save_dir, data_dir, video_name):
     with open(length_path, 'rb') as f:
         frames_numb = pickle.load(f)
 
-    frame_ids = np.linspace(start=2, stop=frames_numb - 1, num=30, dtype=int)
+    # frame_ids = np.linspace(start=2, stop=frames_numb - 1, num=30, dtype=int)
     interval = frames_numb // 30
 
     has_tracks = True
@@ -29,21 +29,18 @@ def get_visual_data(save_dir, data_dir, video_name):
     fake_feature = np.concatenate([np.ones([1, 30, dim - 80]) * -1.0, np.zeros([1, 30, 80])], axis=-1)
     for track in tracks:
         siz = len(track['frame_ids'])
-        if siz < 2 * interval: continue
+        if siz < 3 * interval: continue
 
         temp = []
         frames, features, positions, class_id = track['frame_ids'], track['features'], track['positions'], track['class_id']
+        frame_ids = np.linspace(start=0, stop=len(frames) - 1, num=30, dtype=int)
         for id in frame_ids:
-            if id not in frames:
-                feat = np.ones(dim) * -1.0
-            else:
-                idx = frames.index(id)
-                pos = np.array(positions[idx])
-                visual = np.array(features[idx])
-                class_vec = np.zeros(80)
-                class_vec[class_id] = 1.0
-                feat = np.concatenate([pos, visual, class_vec], axis=0)
-                assert feat.shape[0] == dim
+            pos = np.array(positions[id])
+            visual = np.array(features[id])
+            class_vec = np.zeros(80)
+            class_vec[class_id] = 1.0
+            feat = np.concatenate([pos, visual, class_vec], axis=0)
+            assert feat.shape[0] == dim
             temp.append(feat)
         temp = np.concatenate([feat[np.newaxis, ...] for feat in temp], axis=0)
         assert temp.shape[0] == 30 and temp.shape[1] == dim and len(temp.shape) == 2
@@ -85,8 +82,10 @@ if __name__ == '__main__':
         log_path = os.path.join(save_path, 'info.log')
         cmd = obtain_tracks_cmd.format(video_path=video_path, save_path=save_path)
         cmd = cmd.split()
-        with open(log_path, 'w') as log:
-            subprocess.call(cmd, stdout=log, stderr=log)
+        if not os.path.exists(os.path.join(save_path, 'tracks.pkl')) and \
+            os.path.exists(os.path.join(save_path, 'length.pkl')):
+            with open(log_path, 'w') as log:
+                subprocess.call(cmd, stdout=log, stderr=log)
 
         get_visual_data(save_dir=save_path, data_dir=data_dir, video_name=video_name)
 
