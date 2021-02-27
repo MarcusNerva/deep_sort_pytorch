@@ -55,6 +55,7 @@ class MyExtractor(object):
         self.classifier = models.resnext101_32x8d(pretrained=True)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.net.to(self.device)
+        self.classifier.to(self.device)
         self.trans = trans
 
     # def _preprocess(self, im_crops):

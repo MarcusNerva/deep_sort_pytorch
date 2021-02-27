@@ -171,7 +171,7 @@ if __name__ == '__main__':
     data_dir = '/home/hanhuaye/PythonProject/gat_captioning/data/MSVD'
     # video_list = glob.glob(os.path.join(videos_dir, '*.mp4'))
     video_list = glob.glob(os.path.join(videos_dir, '*.avi'))
-    save_dir = '/home/hanhuaye/PythonProject/opensource/deep_sort_pytorch/output'
+    save_dir = '/home/hanhuaye/PythonProject/opensource/deep_sort_pytorch/newoutput'
     has_process = glob.glob(os.path.join(os.path.join(data_dir, 'objects'), '*.npy'))
     has_process = [item.split('/')[-1].split('.')[0] for item in has_process]
     print(has_process)
@@ -192,7 +192,7 @@ if __name__ == '__main__':
         cmd = obtain_tracks_cmd.format(video_path=video_path, save_path=save_path)
         cmd = cmd.split()
         if not os.path.exists(os.path.join(save_path, 'tracks.pkl')) and \
-            os.path.exists(os.path.join(save_path, 'length.pkl')):
+            not os.path.exists(os.path.join(save_path, 'length.pkl')):
             with open(log_path, 'w') as log:
                 subprocess.call(cmd, stdout=log, stderr=log)
 
