@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import logging
 from PIL import Image
-
+import torchvision.models as models
 from .model import Net
 from .pytorch_model import trans, get_resnext101_32x8d
 
@@ -52,6 +52,7 @@ class MyExtractor(object):
     def __init__(self):
         super(MyExtractor, self).__init__()
         self.net = get_resnext101_32x8d(pretrained=True)
+        self.classifier = models.resnext101_32x8d(pretrained=True)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.net.to(self.device)
         self.trans = trans
@@ -63,15 +64,23 @@ class MyExtractor(object):
     def __call__(self, im_crops):
         # im_batch = self._preprocess(im_crops)
         features = []
+        classes = []
         with torch.no_grad():
             for im in im_crops:
                 im = Image.fromarray(im)
                 im = self.trans(im).unsqueeze(0).to(self.device)
                 feat = self.net(im)
+                class_vec = self.classifier(im)
                 feat = feat.squeeze().cpu().numpy()
+                class_vec = class_vec.squeeze().cpu().numpy()
                 features.append(feat)
-            features = np.stack(features, axis=0)
-        return features
+                classes.append(class_vec)
+            features = np.concatenate([item.unsqueeze(0) for item in features], axis=0)
+            classes = np.concatenate([item.unsqueeze(0) for item in classes], axis=0)
+        assert classes.shape == (len(im_crops), 1000), \
+            'expect classes.shape == {}, but got {}'.\
+                format((len(im_crops), 1000), classes.shape)
+        return features, classes
 
 if __name__ == '__main__':
     img = cv2.imread("demo.jpg")[:,:,(2,1,0)]

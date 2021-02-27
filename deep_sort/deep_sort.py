@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-import pickle
 
 from .deep.feature_extractor import Extractor, MyExtractor
 from .sort.nn_matching import NearestNeighborDistanceMetric
@@ -28,9 +27,9 @@ class DeepSort(object):
     def update(self, bbox_xywh, confidences, cls_ids, ori_img, frame_id):
         self.height, self.width = ori_img.shape[:2]
         # generate detections
-        features, im_crops = self._get_features(bbox_xywh, ori_img)
+        features, class_vec = self._get_features(bbox_xywh, ori_img)
         bbox_tlwh = self._xywh_to_tlwh(bbox_xywh)
-        detections = [Detection(bbox_tlwh[i], conf, cls_ids[i], frame_id, features[i]) for i,conf in enumerate(confidences) if conf>self.min_confidence]
+        detections = [Detection(bbox_tlwh[i], conf, class_vec[i].argmax(), frame_id, features[i]) for i,conf in enumerate(confidences) if conf>self.min_confidence]
 
         # run on non-maximum supression
         boxes = np.array([d.tlwh for d in detections])
@@ -110,10 +109,10 @@ class DeepSort(object):
             im = ori_img[y1:y2,x1:x2]
             im_crops.append(im)
         if im_crops:
-            features = self.extractor(im_crops)
+            features, class_vec = self.extractor(im_crops)
         else:
-            features = np.array([])
-        return features, im_crops
+            features, class_vec = np.array([]), np.array([])
+        return features, class_vec
 
     def get_tracks(self):
         return self.tracker.get_tracks()
