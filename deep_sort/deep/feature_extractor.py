@@ -76,8 +76,8 @@ class MyExtractor(object):
                 class_vec = class_vec.squeeze().cpu().numpy()
                 features.append(feat)
                 classes.append(class_vec)
-            features = np.concatenate([item.unsqueeze(0) for item in features], axis=0)
-            classes = np.concatenate([item.unsqueeze(0) for item in classes], axis=0)
+            features = np.concatenate([item[np.newaxis, ...] for item in features], axis=0)
+            classes = np.concatenate([item[np.newaxis, ...] for item in classes], axis=0)
         assert classes.shape == (len(im_crops), 1000), \
             'expect classes.shape == {}, but got {}'.\
                 format((len(im_crops), 1000), classes.shape)
