@@ -82,7 +82,7 @@ def get_visual_data(save_dir, data_dir, video_dir, video_name, resnext101, devic
 
     interval = frames_numb // 15
     tracks = [item for item in tracks if len(item['frame_ids']) >= interval]
-    tracks = sorted(tracks, key=lambda x: len(track['frame_ids']), reverse=True)
+    tracks = sorted(tracks, key=lambda x: len(x['frame_ids']), reverse=True)
     if len(tracks) > 20:
         tracks = tracks[:20]
     num_tracks = len(tracks)
@@ -94,7 +94,7 @@ def get_visual_data(save_dir, data_dir, video_dir, video_name, resnext101, devic
 
     class_store = []
     for track in tracks:
-        class_id = tracks['class_id']
+        class_id = track['class_id']
         class_vec = np.zeros(1000, dtype=int)
         class_vec[class_id] = 1
         class_store.append(class_vec)
