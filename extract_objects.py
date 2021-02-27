@@ -35,10 +35,10 @@ def process_pos(pos, width, height):
     return np.array([x1, y1, x2, y2], dtype=float)
 
 
-def get_visual_data(save_dir, data_dir, video_name, resnext101, device):
+def get_visual_data(save_dir, data_dir, video_dir, video_name, resnext101, device):
     tracks_path = os.path.join(save_dir, 'tracks.pkl')
     length_path = os.path.join(save_dir, 'length.pkl')
-    video_path = os.path.join(data_dir, video_name + '.avi')
+    video_path = os.path.join(video_dir, video_name + '.avi')
     visual_feature_dir = os.path.join(data_dir, 'objects')
     class_feature_dir = os.path.join(data_dir, 'category')
     visual_feature_path = os.path.join(visual_feature_dir, video_name + '.npy')
@@ -196,7 +196,8 @@ if __name__ == '__main__':
             with open(log_path, 'w') as log:
                 subprocess.call(cmd, stdout=log, stderr=log)
 
-        get_visual_data(save_dir=save_path, data_dir=data_dir,
+        get_visual_data(save_dir=save_path, video_dir=videos_dir,
+                        data_dir=data_dir,
                         video_name=video_name, resnext101=resnext101,
                         device=device)
 
