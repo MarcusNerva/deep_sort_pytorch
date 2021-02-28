@@ -95,7 +95,9 @@ def get_visual_data(save_dir, data_dir, video_dir, video_name, resnext101, devic
     for track in tracks:
         frames_ids = track['frame_ids']
         for id in frames_ids:
-            visit[id] = 1
+            new_id = id - 1
+            assert new_id >= 0
+            visit[new_id] = 1
 
     class_store = []
     for track in tracks:
@@ -109,7 +111,7 @@ def get_visual_data(save_dir, data_dir, video_dir, video_name, resnext101, devic
             format(num_tracks, class_store.shape)
 
     time_span = 15
-    step = int(visit.sum()) // time_span
+    step = max(int(visit.sum()) // time_span, 1)
     anchor_idxs = []
     has_tracks = True
     cnt = 0
@@ -118,11 +120,16 @@ def get_visual_data(save_dir, data_dir, video_dir, video_name, resnext101, devic
         cnt += 1
         if cnt % step == 0:
             anchor_idxs.append(i)
+    origin_anchors_len = len(anchor_idxs)
     idxs = np.linspace(0, len(anchor_idxs), time_span, endpoint=False, dtype=int).tolist()
-    anchor_idxs = [anchor_idxs[i] for i in idxs]
-    assert len(anchor_idxs) == time_span, \
-        'expected len(anchor_idxs) == time_span, but got {}, and now step is {}'.\
-            format(len(anchor_idxs), step)
+    anchor_idxs = [anchor_idxs[i] for i in idxs] if origin_anchors_len > time_span else anchor_idxs
+    if origin_anchors_len >= time_span:
+        assert len(anchor_idxs) == time_span, \
+            'expected len(anchor_idxs) == time_span, but got {}, and now step is {}'.\
+                format(len(anchor_idxs), step)
+    else:
+        assert int(visit.sum()) < time_span, \
+            'expect visit.sum() < time_span, but get {} and step is {}'.format(int(visit.sum()), step)
 
     pool_size = 4
     spatial_scale = 1.0 / 32.0
@@ -130,13 +137,14 @@ def get_visual_data(save_dir, data_dir, video_dir, video_name, resnext101, devic
     roi_align = RoIAlign((pool_size, pool_size), spatial_scale=spatial_scale, sampling_ratio=1).to(device)
 
     result_feature = []
-    objects_mask = np.zeros([15, len(tracks)])
-    for i, idx in enumerate(anchor_idxs):
+    objects_mask = np.zeros([time_span, len(tracks)])
+    for i in range(time_span):
+        idx = anchor_idxs[i] if i < len(anchor_idxs) else None
         temp_store = []
-        feature_map = resnext101(frames_store[idx].to(device))  # (1, 2048, H/32, W/32)
+        feature_map = resnext101(frames_store[idx].to(device)) if idx is not None else None  # (1, 2048, H/32, W/32)
         for j, item in enumerate(tracks):
             frames_ids, positions, class_id = item['frame_ids'], item['positions'], item['class_id']
-            if idx not in frames_ids:
+            if idx is None or idx not in frames_ids:
                 objects_mask[i, j] = 0
                 temp_store.append(fake_feature)
             else:
@@ -163,6 +171,9 @@ def get_visual_data(save_dir, data_dir, video_dir, video_name, resnext101, devic
     assert result_feature.shape == (time_span, num_tracks, resnext_dim, pool_size, pool_size), \
         'expected result_feature.shape == {}, but got {}'.\
             format((time_span, num_tracks, resnext_dim, pool_size, pool_size), result_feature.shape)
+    assert objects_mask[len(anchor_idxs):, ...].sum() == 0., \
+        'expect 0. in objects_mask[len(anchor_idxs):, ...], but got {}'.\
+            format(objects_mask[len(anchor_idxs):, ...].sum())
 
     np.save(visual_feature_path, result_feature)
     np.save(class_feature_path, class_store)
